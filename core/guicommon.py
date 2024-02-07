@@ -36,7 +36,6 @@ Abstract
 Common GUI elements extracted from gui3d to minimize coupling with gui backend.
 """
 
-import events3d
 
 import numpy as np
 import matrix
@@ -54,7 +53,7 @@ class Action(object):
         return True
 
 # Wrapper around Object3D
-class Object(events3d.EventHandler):
+class Object(object):
 
     """
     An object on the screen.
@@ -785,56 +784,4 @@ class Object(events3d.EventHandler):
         if subdivided:
             # Re-generate the subdivided mesh with new UV coordinates
             self.setSubdivided(True)
-
-
-
-    def onMouseDown(self, event):
-        if self.view:
-            self.view.callEvent('onMouseDown', event)
-        else:
-            import log
-            log.debug('FAILED: mouseDown')
-
-    def onMouseMoved(self, event):
-        if self.view:
-            self.view.callEvent('onMouseMoved', event)
-        else:
-            import log
-            log.debug('FAILED: mouseMoved')
-
-    def onMouseDragged(self, event):
-        if self.view:
-            self.view.callEvent('onMouseDragged', event)
-        else:
-            import log
-            log.debug('FAILED: mouseDragged')
-
-    def onMouseUp(self, event):
-        if self.view:
-            self.view.callEvent('onMouseUp', event)
-
-    def onMouseEntered(self, event):
-        if self.view:
-            self.view.callEvent('onMouseEntered', event)
-        else:
-            import log
-            log.debug('FAILED: mouseEntered')
-
-    def onMouseExited(self, event):
-        if self.view:
-            self.view.callEvent('onMouseExited', event)
-        else:
-            import log
-            log.debug('FAILED: mouseExited')
-
-    def onClicked(self, event):
-        if self.view:
-            self.view.callEvent('onClicked', event)
-        else:
-            import log
-            log.debug('FAILED: clicked')
-
-    def onMouseWheel(self, event):
-        if self.view:
-            self.view.callEvent('onMouseWheel', event)
 

@@ -40,7 +40,6 @@ import numpy as np
 import algos3d
 import guicommon
 from core import G
-import events3d
 from getpath import getSysDataPath, canonicalPath
 import log
 import material
@@ -162,17 +161,11 @@ class Human(guicommon.Object, animation.AnimatedMesh):
             self._updateMeshVertexWeights(self.getProxyMesh())
             self.refreshPose()
 
-        event = events3d(self, 'proxyChange')
-        event.proxy = 'human'
-        self.callEvent('onChanged', event)
-
     # TODO introduce better system for managing proxies, nothing done for clothes yet
     def setHairProxy(self, proxy):
         self._swapProxies(self._hairProxy, proxy)
         self._hairProxy = proxy
-        event = events3d.HumanEvent(self, 'proxyChange')
-        event.proxy = 'hair'
-        self.callEvent('onChanged', event)
+
     def getHairProxy(self):
         return self._hairProxy
 
@@ -181,9 +174,6 @@ class Human(guicommon.Object, animation.AnimatedMesh):
     def setEyesProxy(self, proxy):
         self._swapProxies(self._eyesProxy, proxy)
         self._eyesProxy = proxy
-        event = events3d.HumanEvent(self, 'proxyChange')
-        event.proxy = 'eyes'
-        self.callEvent('onChanged', event)
     def getEyesProxy(self):
         return self._eyesProxy
 
@@ -192,9 +182,7 @@ class Human(guicommon.Object, animation.AnimatedMesh):
     def setEyebrowsProxy(self, proxy):
         self._swapProxies(self._eyebrowsProxy, proxy)
         self._eyebrowsProxy = proxy
-        event = events3d.HumanEvent(self, 'proxyChange')
-        event.proxy = 'eyebrows'
-        self.callEvent('onChanged', event)
+
     def getEyebrowsProxy(self):
         return self._eyebrowsProxy
 
@@ -203,9 +191,7 @@ class Human(guicommon.Object, animation.AnimatedMesh):
     def setEyelashesProxy(self, proxy):
         self._swapProxies(self._eyelashesProxy, proxy)
         self._eyelashesProxy = proxy
-        event = events3d.HumanEvent(self, 'proxyChange')
-        event.proxy = 'eyelashes'
-        self.callEvent('onChanged', event)
+
     def getEyelashesProxy(self):
         return self._eyelashesProxy
 
@@ -214,9 +200,7 @@ class Human(guicommon.Object, animation.AnimatedMesh):
     def setTeethProxy(self, proxy):
         self._swapProxies(self._teethProxy, proxy)
         self._teethProxy = proxy
-        event = events3d.HumanEvent(self, 'proxyChange')
-        event.proxy = 'teeth'
-        self.callEvent('onChanged', event)
+
     def getTeethProxy(self):
         return self._teethProxy
 
@@ -225,9 +209,7 @@ class Human(guicommon.Object, animation.AnimatedMesh):
     def setTongueProxy(self, proxy):
         self._swapProxies(self._tongueProxy, proxy)
         self._tongueProxy = proxy
-        event = events3d.HumanEvent(self, 'proxyChange')
-        event.proxy = 'tongue'
-        self.callEvent('onChanged', event)
+
     def getTongueProxy(self):
         return self._tongueProxy
 
@@ -244,23 +226,13 @@ class Human(guicommon.Object, animation.AnimatedMesh):
         uuid = proxy.getUuid()
         self._swapProxies(self._clothesProxies.get(uuid, None), proxy)
         self._clothesProxies[uuid] = proxy
-        event = events3d.HumanEvent(self, 'proxyChange')
-        event.proxy = 'clothes'
-        event.action = 'add'
-        event.proxy_obj = proxy
-        self.callEvent('onChanged', event)
 
     def removeClothesProxy(self, uuid):
         self._swapProxies(self._clothesProxies.get(uuid, None), None)
-        event = events3d.HumanEvent(self, 'proxyChange')
         proxy = None
         if uuid in self._clothesProxies:
             proxy = self._clothesProxies[uuid]
             del self._clothesProxies[uuid]
-        event.proxy = 'clothes'
-        event.action = 'remove'
-        event.proxy_obj = proxy
-        self.callEvent('onChanged', event)
 
     def _swapProxies(self, oldPxy, newPxy):
         """
@@ -422,7 +394,6 @@ class Human(guicommon.Object, animation.AnimatedMesh):
             if obj:
                 obj.show()
         self.setVisibility(True)
-        self.callEvent('onShown', self)
 
     def hide(self):
 
@@ -431,7 +402,6 @@ class Human(guicommon.Object, animation.AnimatedMesh):
             if obj:
                 obj.hide()
         self.setVisibility(False)
-        self.callEvent('onHidden', self)
 
     # Overriding methods to account for both hair and base object
 
@@ -442,15 +412,12 @@ class Human(guicommon.Object, animation.AnimatedMesh):
             if obj:
                 obj.setPosition([x+y for x, y in zip(obj.getPosition(), dv)])
 
-        self.callEvent('onTranslated', self)
-
     def setRotation(self, rotation):
         guicommon.Object.setRotation(self, rotation)
         for obj in self.getProxyObjects():
             if obj:
                 obj.setRotation(rotation)
 
-        self.callEvent('onRotated', self)
 
     def setSolid(self, *args, **kwargs):
         guicommon.Object.setSolid(self, *args, **kwargs)
@@ -466,8 +433,6 @@ class Human(guicommon.Object, animation.AnimatedMesh):
 
             for obj in proxies:
                 obj.setSubdivided(flag, *args, **kwargs)
-
-            self.callEvent('onChanged', events3d.HumanEvent(self, 'smooth'))
 
     def setGender(self, gender, updateModifier = True):
         """
@@ -491,7 +456,6 @@ class Human(guicommon.Object, animation.AnimatedMesh):
             return
         self.gender = gender
         self._setGenderVals()
-        self.callEvent('onChanging', events3d.HumanEvent(self, 'gender'))
 
     def getGender(self):
         """
@@ -539,7 +503,6 @@ class Human(guicommon.Object, animation.AnimatedMesh):
             return
         self.age = age
         self._setAgeVals()
-        self.callEvent('onChanging', events3d.HumanEvent(self, 'age'))
 
     def getAge(self):
         """
@@ -619,7 +582,6 @@ class Human(guicommon.Object, animation.AnimatedMesh):
             return
         self.weight = weight
         self._setWeightVals()
-        self.callEvent('onChanging', events3d.HumanEvent(self, 'weight'))
 
     def getWeight(self):
         return self.weight
@@ -662,7 +624,6 @@ class Human(guicommon.Object, animation.AnimatedMesh):
             return
         self.muscle = muscle
         self._setMuscleVals()
-        self.callEvent('onChanging', events3d.HumanEvent(self, 'muscle'))
 
     def getMuscle(self):
         return self.muscle
@@ -684,7 +645,6 @@ class Human(guicommon.Object, animation.AnimatedMesh):
             return
         self.height = height
         self._setHeightVals()
-        self.callEvent('onChanging', events3d.HumanEvent(self, 'height'))
 
     def getHeight(self):
         return self.height
@@ -723,7 +683,6 @@ class Human(guicommon.Object, animation.AnimatedMesh):
             return
         self.breastSize = size
         self._setBreastSizeVals()
-        self.callEvent('onChanging', events3d.HumanEvent(self, 'breastSize'))
 
     def getBreastSize(self):
         return self.breastSize
@@ -748,7 +707,6 @@ class Human(guicommon.Object, animation.AnimatedMesh):
             return
         self.breastFirmness = firmness
         self._setBreastFirmnessVals()
-        self.callEvent('onChanging', events3d.HumanEvent(self, 'breastFirmness'))
 
     def getBreastFirmness(self):
         return self.breastFirmness
@@ -774,7 +732,6 @@ class Human(guicommon.Object, animation.AnimatedMesh):
             return
         self.bodyProportions = proportion
         self._setBodyProportionVals()
-        self.callEvent('onChanging', events3d.HumanEvent(self, 'bodyProportions'))
 
     def _setBodyProportionVals(self):
         self.idealproportionsVal = max(0.0, self.bodyProportions * 2 - 1)
@@ -801,8 +758,6 @@ class Human(guicommon.Object, animation.AnimatedMesh):
         if sync and not self.blockEthnicUpdates:
             self._setEthnicVals('caucasian')
 
-        self.callEvent('onChanging', events3d.HumanEvent(self, 'caucasian'))
-
     def getCaucasian(self):
         return self.caucasianVal
 
@@ -819,8 +774,6 @@ class Human(guicommon.Object, animation.AnimatedMesh):
         if sync and not self.blockEthnicUpdates:
             self._setEthnicVals('african')
 
-        self.callEvent('onChanging', events3d.HumanEvent(self, 'african'))
-
     def getAfrican(self):
         return self.africanVal
 
@@ -836,8 +789,6 @@ class Human(guicommon.Object, animation.AnimatedMesh):
 
         if sync and not self.blockEthnicUpdates:
             self._setEthnicVals('asian')
-
-        self.callEvent('onChanging', events3d.HumanEvent(self, 'asian'))
 
     def getAsian(self):
         return self.asianVal
@@ -1175,8 +1126,6 @@ class Human(guicommon.Object, animation.AnimatedMesh):
         if self.skeleton:
             self.skeleton.dirty = True
 
-        self.callEvent('onChanged', events3d.HumanEvent(self, 'targets'))
-
         # Restore pose, and shadow copy of vertex positions 
         # (We do this after onChanged event so that proxies are already updated)
         self.refreshStaticMeshes()  # TODO document: an external plugin that modifies the rest pose verts outside of an onHumanChang(ing/ed) event should explicitly call this method on the human
@@ -1292,9 +1241,6 @@ class Human(guicommon.Object, animation.AnimatedMesh):
 
         self.setMaterial(self._defaultMaterial)
 
-        self.callEvent('onChanging', events3d.HumanEvent(self, 'reset'))
-        self.callEvent('onChanged', events3d.HumanEvent(self, 'reset'))
-
     def _resetProxies(self):
         """
         Remove all attached proxies.
@@ -1313,20 +1259,16 @@ class Human(guicommon.Object, animation.AnimatedMesh):
         return super(Human, self).getMaterial()
 
     def setMaterial(self, mat):
-        self.callEvent('onChanging', events3d.HumanEvent(self, 'material'))
         super(Human, self).setMaterial(mat)
-        self.callEvent('onChanged', events3d.HumanEvent(self, 'material'))
 
     material = property(getMaterial, setMaterial)
 
     def setSkeleton(self, skel):
         """Change user-selected skeleton.
         """
-        self.callEvent('onChanging', events3d.HumanEvent(self, 'user-skeleton'))
         self.skeleton = skel
         if self.skeleton:
             self.skeleton.dirty = True
-        self.callEvent('onChanged', events3d.HumanEvent(self, 'user-skeleton'))
 
     def getSkeleton(self):
         """The user-selected skeleton. The skeleton that is shown on the human
@@ -1343,10 +1285,8 @@ class Human(guicommon.Object, animation.AnimatedMesh):
         """Set the reference skeleton, used for poses and weighting vertices.
         Generally this skeleton is initialized once and does not change.
         """
-        self.callEvent('onChanging', events3d.HumanEvent(self, 'skeleton'))
         animation.AnimatedMesh.setBaseSkeleton(self, skel)
         self.updateVertexWeights(skel.getVertexWeights() if skel else None)
-        self.callEvent('onChanged', events3d.HumanEvent(self, 'skeleton'))
         self.refreshPose()
 
     def updateVertexWeights(self, vertexWeights):
@@ -1415,27 +1355,17 @@ class Human(guicommon.Object, animation.AnimatedMesh):
         return bodyWeights
 
     def setPosed(self, posed):
-        event = events3d.HumanEvent(self, 'poseState')
-        event.state = posed
-        self.callEvent('onChanging', event)
         if self.skeleton:
             self.skeleton.dirty = True
         animation.AnimatedMesh.setPosed(self, posed)
-        self.callEvent('onChanged', event)
 
     def setActiveAnimation(self, anim_name):
-        event = events3d.HumanEvent(self, 'poseChange')
-        event.pose = anim_name
-        self.callEvent('onChanging', event)
         if self.skeleton:
             self.skeleton.dirty = True
         super(Human, self).setActiveAnimation(anim_name)
-        self.callEvent('onChanged', event)
 
     def refreshPose(self, updateIfInRest=False):
         # TODO investigate why at startup this is called so often
-        event = events3d.HumanEvent(self, 'poseRefresh')
-        self.callEvent('onChanging', event)
         if self.skeleton:
             self.skeleton.dirty = True
         super(Human, self).refreshPose(updateIfInRest)
@@ -1443,7 +1373,6 @@ class Human(guicommon.Object, animation.AnimatedMesh):
             self.updateSubdivisionMesh()
             self.mesh.calcNormals()
             self.mesh.update()
-        self.callEvent('onChanged', event)
 
     def load(self, filename, update=True, strict=False):
 
@@ -1467,9 +1396,6 @@ class Human(guicommon.Object, animation.AnimatedMesh):
             return None
 
         log.message("Loading human from MHM file %s.", filename)
-        event = events3d.HumanEvent(self, 'load')
-        event.path = filename
-        self.callEvent('onChanging', event)
 
         self.resetMeshValues()
         self.blockEthnicUpdates = True
@@ -1558,8 +1484,6 @@ class Human(guicommon.Object, animation.AnimatedMesh):
         self.blockEthnicUpdates = False
         self._setEthnicVals()
 
-        self.callEvent('onChanged', event)
-
         if update:
             self.applyAllTargets()
 
@@ -1571,10 +1495,6 @@ class Human(guicommon.Object, animation.AnimatedMesh):
         log.message("Done loading MHM file.")
 
     def save(self, filename):
-        event = events3d.HumanEvent(self, 'save')
-        event.path = filename
-        self.callEvent('onChanging', event)
-
         with open(filename, "w", encoding="utf-8") as f:
             f.write('# Written by MakeHuman %s\n' % getVersionStr())
             f.write('version %s\n' % getShortVersion(noSub=True))
@@ -1618,5 +1538,3 @@ class Human(guicommon.Object, animation.AnimatedMesh):
                 handler(self, f)
 
             f.write('subdivide %s' % self.isSubdivided())
-
-        self.callEvent('onChanged', event)

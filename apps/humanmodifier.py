@@ -41,7 +41,6 @@ __docformat__ = 'restructuredtext'
 import algos3d
 import guicommon
 from core import G
-import events3d
 import operator
 import numpy as np
 import log
@@ -166,7 +165,6 @@ class Modifier(object):
         self._symmModifier = None
         self.verts = None
         self.faces = None
-        self.eventType = 'modifier'
         self.targets = []
         self.description = ""
 
@@ -287,9 +285,6 @@ class Modifier(object):
         if updateNormals:
             self.human.meshData.calcNormals(1, 1, self.verts, self.faces)
         self.human.meshData.update()
-        event = events3d.HumanEvent(self.human, self.eventType)
-        event.modifier = self.fullName
-        self.human.callEvent('onChanging', event)
 
     def getSymmetrySide(self):
         """
